@@ -8,4 +8,4 @@ This repository contains materials created for GBUS 562: AI Language Models at t
 
 ## Weekly Material
 
-1. week-01
+1. [week-01](week-01/)
