@@ -8,6 +8,8 @@ This repository contains materials created for GBUS 562: AI Language Models at t
 
 ## Weekly Work
 
-### [week-01](week-01/)
+### week-01
 
-A single-page Connect 4 game. Play against a computer opponent at three strength levels, or with a friend in two-player mode.
+#### [Connect 4 Game](week-01/connect-4.html)
+
+A single-page browser game. Play against a computer opponent at three strength levels, or with a friend in two-player mode.
