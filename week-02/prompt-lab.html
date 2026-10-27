@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  /* Layout: a lab bench. Controls on the left, the transcript Claude receives on the right. */
+  :root {
+    --bg: #F2F4F6;
+    --panel: #FFFFFF;
+    --field: #FBFCFD;
+    --ink: #16202B;
+    --muted: #5C6977;
+    --line: #D6DCE3;
+    --accent: #0E6B66;
+    --accent-ink: #FFFFFF;
+    --you: #2D5AA6;
+    --claude: #0E6B66;
+    --system: #6A5A8C;
+    --error: #B42318;
+    --error-bg: #FDF1EF;
+    --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0F1419;
+      --panel: #171E26;
+      --field: #121820;
+      --ink: #E4E9EF;
+      --muted: #8D9AA8;
+      --line: #2A343F;
+      --accent: #3FB5AC;
+      --accent-ink: #0B1A19;
+      --you: #7FA6EA;
+      --claude: #4FC2B8;
+      --system: #B1A0D6;
+      --error: #FF8A7A;
+      --error-bg: #2A1714;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .app {
+    max-width: 1240px;
+    margin: 0 auto;
+    min-height: 100%;
+    padding: 24px 16px 32px;
+    display: grid;
+    grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "head head" "controls log";
+    gap: 20px 28px;
+  }
+  @media (max-width: 860px) {
+    .app { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "controls" "log"; }
+  }
+
+  header {
+    grid-area: head;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  h1 { margin: 0; font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+  h1 span { color: var(--accent); }
+  .model {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .model b { color: var(--ink); font-weight: 600; }
+
+  .controls { grid-area: controls; display: grid; gap: 18px; align-content: start; min-width: 0; }
+  .field { display: grid; gap: 6px; }
+  .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  label, .label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .help { font-size: 0.8rem; color: var(--muted); margin: 0; }
+  .help.bad { color: var(--error); }
+
+  input, textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+  }
+  textarea { resize: vertical; line-height: 1.45; }
+  #system { min-height: 96px; }
+  #prompt { min-height: 140px; }
+  input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+  input[aria-invalid="true"] { border-color: var(--error); }
+
+  .key-row { display: flex; gap: 6px; }
+  .key-row input { font-family: var(--mono); font-size: 0.85rem; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  button {
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: var(--muted); }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button:disabled { opacity: 0.45; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  button.primary:hover:not(:disabled) { filter: brightness(1.08); border-color: var(--accent); }
+  .key-row button { flex: none; font-size: 0.8rem; padding: 8px 10px; }
+  .shortcut { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+
+  /* Conversation log */
+  .log-panel {
+    grid-area: log;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    min-height: 420px;
+    max-height: calc(100vh - 140px);
+  }
+  @media (max-width: 860px) { .log-panel { max-height: 75vh; } }
+  .log-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+  .log-head .count { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+  .log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 16px 16px;
+    display: flex;
+    flex-direction: column;
+  }
+  .empty {
+    margin: auto;
+    max-width: 38ch;
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 0;
+  }
+
+  .entry { padding: 14px 0 14px 14px; border-bottom: 1px solid var(--line); border-left: 3px solid var(--tone); }
+  .entry:last-child { border-bottom: 0; }
+  .entry + .entry { margin-top: 0; }
+  .entry.system { --tone: var(--system); }
+  .entry.user { --tone: var(--you); }
+  .entry.assistant { --tone: var(--claude); }
+  .entry.error { --tone: var(--error); background: var(--error-bg); }
+  .entry.waiting { --tone: var(--claude); }
+  .entry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    margin-bottom: 4px;
+  }
+  .who {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tone);
+  }
+  .meta { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .note { margin: 0 0 4px; font-size: 0.85rem; font-style: italic; color: var(--muted); }
+  .entry.error .note { color: var(--error); font-style: normal; font-weight: 600; }
+  .text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .warn { margin: 6px 0 0; font-size: 0.82rem; color: var(--error); }
+
+  .dots { display: inline-flex; gap: 5px; align-items: center; height: 1.4em; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--claude); animation: blink 1.2s infinite ease-in-out; }
+  .dots i:nth-child(2) { animation-delay: 0.2s; }
+  .dots i:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: 0.2; } 40% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .dots i { animation: none; opacity: 0.7; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Prompt <span>Lab</span></h1>
+    <div class="model">Model: <b id="model-name"></b></div>
+  </header>
+
+  <section class="controls" aria-label="Prompt controls">
+    <div class="field">
+      <label for="api-key">Anthropic API key</label>
+      <div class="key-row">
+        <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…">
+        <button id="toggle-key" type="button" aria-pressed="false">Show</button>
+      </div>
+      <p class="help" id="key-help">Kept in this tab only. Never saved; paste it again each time you open the page.</p>
+    </div>
+
+    <div class="field">
+      <div class="label-row">
+        <label for="system">System prompt</label>
+        <span class="help">Optional</span>
+      </div>
+      <textarea id="system" placeholder="e.g. You are a concise tutor for a graduate business course."></textarea>
+    </div>
+
+    <div class="field">
+      <label for="prompt">Your prompt</label>
+      <textarea id="prompt" placeholder="Type a prompt to send to Claude."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="primary" id="send" type="button">Send</button>
+      <button id="new" type="button">New Conversation</button>
+      <button id="export" type="button">Export</button>
+      <span class="shortcut">⌘/Ctrl + Enter sends</span>
+    </div>
+  </section>
+
+  <section class="log-panel" aria-label="Conversation log">
+    <div class="log-head">
+      <span class="label">Conversation sent to Claude</span>
+      <span class="count" id="count">0 messages</span>
+    </div>
+    <div class="log" id="log" aria-live="polite">
+      <p class="empty" id="empty">Nothing sent yet. Each prompt goes to Claude together with every earlier message shown here, so this log is exactly what Claude sees.</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const MODEL = "claude-sonnet-5";
+  const API_URL = "https://api.anthropic.com/v1/messages";
+  const MAX_TOKENS = 16000;
+  const LABELS = { system: "System", user: "You", assistant: "Claude" };
+
+  const $ = id => document.getElementById(id);
+  const keyInput = $("api-key"), systemInput = $("system"), promptInput = $("prompt");
+  const sendBtn = $("send"), newBtn = $("new"), exportBtn = $("export");
+  const logEl = $("log"), emptyEl = $("empty"), countEl = $("count");
+  $("model-name").textContent = MODEL;
+
+  // messages: what the API receives. entries: everything shown in the log (and exported).
+  // The API key lives only in the input field; nothing here stores it.
+  let conversations = 0;
+  let state = freshState();
+  function freshState() {
+    return { messages: [], entries: [], systemSent: null, busy: false, controller: null, id: ++conversations };
+  }
+
+  /* ---------- Log ---------- */
+
+  function addEntry(role, text, opts = {}) {
+    const entry = { role, text, note: opts.note || "", meta: opts.meta || "", warn: opts.warn || "", error: !!opts.error };
+    const el = document.createElement("article");
+    el.className = `entry ${role}${entry.error ? " error" : ""}`;
+    const head = document.createElement("div");
+    head.className = "entry-head";
+    const who = document.createElement("span");
+    who.className = "who";
+    who.textContent = LABELS[role];
+    head.appendChild(who);
+    if (entry.meta) {
+      const meta = document.createElement("span");
+      meta.className = "meta";
+      meta.textContent = entry.meta;
+      head.appendChild(meta);
+    }
+    el.appendChild(head);
+    if (entry.note) {
+      const note = document.createElement("p");
+      note.className = "note";
+      note.textContent = entry.note;
+      el.appendChild(note);
+    }
+    const body = document.createElement("p");
+    body.className = "text";
+    body.textContent = text;
+    el.appendChild(body);
+    if (entry.warn) {
+      const warn = document.createElement("p");
+      warn.className = "warn";
+      warn.textContent = entry.warn;
+      el.appendChild(warn);
+    }
+    entry.el = el;
+    state.entries.push(entry);
+    logEl.appendChild(el);
+    refresh();
+    scrollToEnd();
+    return entry;
+  }
+
+  function removeEntry(entry) {
+    entry.el.remove();
+    state.entries = state.entries.filter(e => e !== entry);
+    refresh();
+  }
+
+  function showWaiting() {
+    const el = document.createElement("article");
+    el.className = "entry waiting";
+    el.innerHTML = '<div class="entry-head"><span class="who">Claude</span><span class="meta">Waiting for a reply…</span></div><span class="dots" aria-label="Claude is responding"><i></i><i></i><i></i></span>';
+    logEl.appendChild(el);
+    scrollToEnd();
+    return el;
+  }
+
+  function scrollToEnd() { logEl.scrollTop = logEl.scrollHeight; }
+
+  function refresh() {
+    emptyEl.hidden = state.entries.length > 0;
+    const n = state.messages.length;
+    countEl.textContent = `${n} message${n === 1 ? "" : "s"}`;
+    sendBtn.disabled = state.busy;
+    sendBtn.textContent = state.busy ? "Waiting…" : "Send";
+    exportBtn.disabled = state.entries.length === 0;
+  }
+
+  /* ---------- Sending ---------- */
+
+  function errorText(status, data) {
+    const apiMsg = data?.error?.message;
+    if (status === 401) return "The API key was rejected (401). Check that you pasted the whole key.";
+    if (status === 403) return `This key isn't allowed to make this request (403).${apiMsg ? " " + apiMsg : ""}`;
+    if (status === 429) return "Rate limit reached (429). Wait a moment, then send again.";
+    if (status === 529) return "The API is overloaded right now (529). Try again in a minute.";
+    return `The API returned an error (${status}).${apiMsg ? " " + apiMsg : ""}`;
+  }
+
+  async function send() {
+    if (state.busy) return;
+    const key = keyInput.value.trim();
+    const prompt = promptInput.value;
+    if (!key) {
+      keyInput.setAttribute("aria-invalid", "true");
+      $("key-help").textContent = "Paste your Anthropic API key here before sending.";
+      $("key-help").classList.add("bad");
+      keyInput.focus();
+      return;
+    }
+    if (!prompt.trim()) { promptInput.focus(); return; }
+
+    const system = systemInput.value.trim();
+    if (state.systemSent === null) {
+      if (system) addEntry("system", system, { note: "System prompt" });
+    } else if (system !== state.systemSent) {
+      if (!system) addEntry("system", "(none)", { note: "System prompt removed. From here on, Claude gets the conversation with no system prompt." });
+      else if (!state.systemSent) addEntry("system", system, { note: "System prompt added mid-conversation. From here on, Claude sees it at the top of the whole conversation." });
+      else addEntry("system", system, { note: "System prompt changed. From here on, Claude sees this one at the top of the whole conversation, in place of the earlier one." });
+    }
+    state.systemSent = system;
+
+    const earlier = state.messages.length;
+    state.messages.push({ role: "user", content: prompt });
+    const userEntry = addEntry("user", prompt, {
+      meta: earlier ? `sent with ${earlier} earlier message${earlier === 1 ? "" : "s"}` : "first message",
+    });
+    promptInput.value = "";
+
+    const id = state.id;
+    const controller = new AbortController();
+    state.controller = controller;
+    state.busy = true;
+    refresh();
+    const waiting = showWaiting();
+
+    try {
+      const body = { model: MODEL, max_tokens: MAX_TOKENS, messages: state.messages.map(m => ({ role: m.role, content: m.content })) };
+      if (system) body.system = system;
+      let res;
+      try {
+        res = await fetch(API_URL, {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "content-type": "application/json",
+            "x-api-key": key,
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true",
+          },
+          body: JSON.stringify(body),
+        });
+      } catch (err) {
+        if (err.name === "AbortError") throw err;
+        throw new Error("Couldn't reach the Anthropic API. Check your internet connection and try again.");
+      }
+      const data = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(errorText(res.status, data));
+      if (data.stop_reason === "refusal") {
+        const cat = data.stop_details?.category;
+        throw new Error(`Claude declined to answer this prompt${cat ? ` (category: ${cat})` : ""}. Try rewording it.`);
+      }
+      const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n\n");
+      if (!text) throw new Error(`Claude returned no text (stop reason: ${data.stop_reason}).`);
+      if (id !== state.id) return;
+
+      state.messages.push({ role: "assistant", content: text });
+      const u = data.usage || {};
+      addEntry("assistant", text, {
+        meta: `${u.input_tokens ?? "?"} in · ${u.output_tokens ?? "?"} out tokens`,
+        warn: data.stop_reason === "max_tokens" ? `Reply cut off at the ${MAX_TOKENS.toLocaleString()}-token limit.` : "",
+      });
+    } catch (err) {
+      if (id !== state.id) return; // the conversation was cleared while waiting
+      // Claude never saw this prompt, so take it back out of the conversation and return it to the box.
+      state.messages.pop();
+      removeEntry(userEntry);
+      if (!promptInput.value) promptInput.value = prompt;
+      addEntry("system", err.message, { note: "Error: this prompt was not delivered. It's back in the prompt box.", error: true });
+    } finally {
+      waiting.remove();
+      if (id === state.id) {
+        state.busy = false;
+        state.controller = null;
+        refresh();
+      }
+    }
+  }
+
+  /* ---------- New conversation & export ---------- */
+
+  function newConversation() {
+    state.controller?.abort();
+    state = freshState();
+    logEl.replaceChildren(emptyEl);
+    refresh();
+    promptInput.focus();
+  }
+
+  function exportMarkdown() {
+    if (!state.entries.length) return;
+    const parts = [MODEL, ""];
+    for (const e of state.entries) {
+      parts.push(`### ${LABELS[e.role]}`, "");
+      if (e.note) parts.push(`*${e.note}*`, "");
+      parts.push(e.text, "");
+      if (e.warn) parts.push(`*${e.warn}*`, "");
+    }
+    const blob = new Blob([parts.join("\n")], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 16).replace("T", "-").replace(":", "");
+    a.href = url;
+    a.download = `prompt-lab-${stamp}.md`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  /* ---------- Wiring ---------- */
+
+  sendBtn.addEventListener("click", send);
+  newBtn.addEventListener("click", newConversation);
+  exportBtn.addEventListener("click", exportMarkdown);
+  promptInput.addEventListener("keydown", e => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(); }
+  });
+  keyInput.addEventListener("input", () => {
+    keyInput.removeAttribute("aria-invalid");
+    $("key-help").textContent = "Kept in this tab only. Never saved; paste it again each time you open the page.";
+    $("key-help").classList.remove("bad");
+  });
+  $("toggle-key").addEventListener("click", e => {
+    const show = keyInput.type === "password";
+    keyInput.type = show ? "text" : "password";
+    e.currentTarget.textContent = show ? "Hide" : "Show";
+    e.currentTarget.setAttribute("aria-pressed", String(show));
+  });
+
+  refresh();
+})();
+</script>
+</body>
+</html>
