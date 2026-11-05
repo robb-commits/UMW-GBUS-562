@@ -222,5 +222,23 @@ __marimo__/
 # macOS
 .DS_Store
 
-# Week 3 RAG tool: local Chroma database (rebuild with: .venv/bin/python week-03/ask.py --rebuild)
-week-03/chroma_db/
+# Python virtual environment (also covered above; listed here so it's easy to see)
+.venv/
+
+# RAG tools: local Chroma databases, one per documents folder under week-03/chroma_db/
+# (rebuild with: .venv/bin/python week-03/ask.py --docs <folder> --rebuild)
+chroma_db/
+chroma.sqlite3
+
+# API keys: never commit
+API-Key.txt
+API Key.txt
+API_Key.txt
+api-key.txt
+api_key.txt
+apikey.txt
+*api-key*.txt
+*api_key*.txt
+*.key
+.env.*
+!.env.example

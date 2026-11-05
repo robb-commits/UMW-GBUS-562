@@ -1,0 +1,48 @@
+Rank: 1
+Similarity: 0.273
+Source: share-certificates.html
+
+Share Certificates > Dividend rates
+Source file: share-certificates.html
+About this document: Version 5 (current). Owner: Deposit Products.
+
+- 6-month share certificate: 3.05% annual percentage yield (APY).
+- 12-month share certificate: 3.40% APY.
+- 24-month share certificate: 3.55% APY.
+- 36-month share certificate: 3.60% APY.
+- 60-month share certificate: 3.75% APY.
+The rate is fixed when the certificate is opened and does not change during the term. Dividends are paid monthly and can stay in the certificate or be transferred to the member's savings or checking account.
+
+Rank: 2
+Similarity: 0.269
+Source: fee-refund-guide.html
+
+Fee Refund Guide for Member Service Staff > Refunds that need a branch manager
+Source file: fee-refund-guide.html
+About this document: Version 2 (current). Owner: Member Services.
+Context from elsewhere in this document: References the $30 threshold defined in Section 2: "A member service representative may approve a refund of a single fee of $30 or less without anyone else's approval."
+
+A refund needs the branch manager's approval when the fee is more than $30, when the member has already had a refund in the last 90 days, or when the member asks for several fees to be refunded at once. A branch manager may approve refunds of up to $150 in total for one member in any 90-day period.
+
+Rank: 3
+Similarity: 0.262
+Source: consumer-fee-schedule.html
+
+Consumer Fee Schedule > Stop payments
+Source file: consumer-fee-schedule.html
+About this document: Version 8 (current). Replaces Version 7. Owner: Member Services.
+
+A stop payment on a check costs $30 per request. One request can cover a single check or a series of checks with consecutive numbers. A stop payment stays in effect for six months and can be renewed for another $30.
+
+Rank: 4
+Similarity: 0.241
+Source: consumer-fee-schedule.html
+
+Consumer Fee Schedule > Checking account monthly fees
+Source file: consumer-fee-schedule.html
+About this document: Version 8 (current). Replaces Version 7. Owner: Member Services.
+
+Everyday Checking has no monthly service fee. Plus Checking has a monthly service fee of $8. The Plus Checking fee is waived for any month in which the account keeps a minimum daily balance of $1,000, or receives direct deposits totaling $500 or more.
+
+ANSWER
+The provided documents don't contain information about mortgage rates. They cover share certificate dividend rates, fee refund policies, stop payment fees, and checking account monthly fees [share-certificates.html] [fee-refund-guide.html] [consumer-fee-schedule.html], but nothing about mortgages.

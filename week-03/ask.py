@@ -1,10 +1,15 @@
-"""Answer questions about the documents in copperline-docs with retrieval-augmented generation.
+"""Answer questions about a folder of documents with retrieval-augmented generation.
 
 Usage (from the top of the repository):
     .venv/bin/python week-03/ask.py "What is the hotel limit in Chicago?"
     .venv/bin/python week-03/ask.py              # ask several questions in a row
     .venv/bin/python week-03/ask.py --rebuild    # rebuild the database after adding or removing documents
     .venv/bin/python week-03/ask.py --show-chunks
+    .venv/bin/python week-03/ask.py --docs week-03/larkfield-docs "..."   # another documents folder
+    .venv/bin/python week-03/ask.py "..." --save week-03/runs/q1.txt      # also save the full run to a file
+
+The default documents folder is week-03/copperline-docs. Each documents folder gets its own
+database under week-03/chroma_db/, so switching folders never overwrites another folder's database.
 
 How it works:
   1. Every document is split into one chunk per section (heading plus its text). Each chunk starts
@@ -37,8 +42,7 @@ MAX_SECTION_CHARS = 1500  # longer sections are split at paragraph breaks
 
 HERE = Path(__file__).resolve().parent
 DOCS_DIR = HERE / "copperline-docs"
-DB_DIR = HERE / "chroma_db"
-COLLECTION = "copperline_docs"
+DB_ROOT = HERE / "chroma_db"  # one database per documents folder, e.g. chroma_db/copperline-docs/
 # The key lives in the folder that contains the repository, never inside it.
 KEY_FILES = [HERE.parent.parent / "API-Key.txt", HERE.parent.parent / "API Key.txt"]
 
@@ -376,8 +380,17 @@ def fingerprint(files: list[Path], docs_dir: Path) -> str:
     return h.hexdigest()[:16]
 
 
-def open_db() -> chromadb.ClientAPI:
-    return chromadb.PersistentClient(path=str(DB_DIR), settings=Settings(anonymized_telemetry=False))
+def db_name(docs_dir: Path) -> str:
+    """Database and collection name for a documents folder: its folder name, plus a short hash of the
+    full path for folders outside week-03 so two folders with the same name never share a database."""
+    name = re.sub(r"[^A-Za-z0-9._-]", "-", docs_dir.name).strip("-._") or "docs"
+    if docs_dir.parent != HERE:
+        name += "-" + hashlib.sha256(str(docs_dir).encode()).hexdigest()[:8]
+    return name.ljust(3, "_")  # Chroma collection names need at least 3 characters
+
+
+def open_db(docs_dir: Path) -> chromadb.ClientAPI:
+    return chromadb.PersistentClient(path=str(DB_ROOT / db_name(docs_dir)), settings=Settings(anonymized_telemetry=False))
 
 
 def build(client: anthropic.Anthropic, docs_dir: Path) -> None:
@@ -404,11 +417,12 @@ def build(client: anthropic.Anthropic, docs_dir: Path) -> None:
         all_chunks.extend(chunks)
         print(f"  {rel}: {len(chunks)} chunks ({len(notes)} with context notes)")
 
-    db = open_db()
-    if COLLECTION in [c.name for c in db.list_collections()]:
-        db.delete_collection(COLLECTION)
+    name = db_name(docs_dir)
+    db = open_db(docs_dir)
+    if name in [c.name for c in db.list_collections()]:
+        db.delete_collection(name)
     collection = db.create_collection(
-        COLLECTION,
+        name,
         configuration={"hnsw": {"space": "cosine"}},  # so similarity = 1 - distance
         metadata={"fingerprint": fingerprint(files, docs_dir), "docs_dir": str(docs_dir)},
     )
@@ -417,16 +431,18 @@ def build(client: anthropic.Anthropic, docs_dir: Path) -> None:
         documents=[c.text for c in all_chunks],
         metadatas=[{"source": c.source, "title": c.title, "section": c.section} for c in all_chunks],
     )
-    print(f"Built the database: {len(all_chunks)} chunks from {len(files)} documents, saved in {DB_DIR.name}/.")
+    print(f"Built the database: {len(all_chunks)} chunks from {len(files)} documents, "
+          f"saved in {(DB_ROOT / name).relative_to(HERE)}/.")
 
 
 def get_collection(client: anthropic.Anthropic, docs_dir: Path):
-    db = open_db()
-    if COLLECTION not in [c.name for c in db.list_collections()]:
-        print("No database yet. Building it now…")
+    name = db_name(docs_dir)
+    db = open_db(docs_dir)
+    if name not in [c.name for c in db.list_collections()]:
+        print(f"No database yet for {docs_dir.name}. Building it now…")
         build(client, docs_dir)
-        db = open_db()
-    collection = db.get_collection(COLLECTION)
+        db = open_db(docs_dir)
+    collection = db.get_collection(name)
     files, _ = doc_files(docs_dir)
     if (collection.metadata or {}).get("fingerprint") != fingerprint(files, docs_dir):
         print("Note: documents were added, removed or changed since the database was built. "
@@ -438,7 +454,7 @@ def get_collection(client: anthropic.Anthropic, docs_dir: Path):
 # Asking
 # ---------------------------------------------------------------------------
 
-ANSWER_SYSTEM = """You answer questions about Copperline Manufacturing's internal finance documents.
+ANSWER_SYSTEM = """You answer questions about an organization's internal documents.
 
 Answer only from the sources in the user's message. Don't use outside knowledge or assumptions, \
 even when you think you know the answer.
@@ -478,7 +494,7 @@ def answer(client: anthropic.Anthropic, question: str, hits: list[dict]) -> str:
     return text or f"(Claude returned no text; stop reason: {response.stop_reason})"
 
 
-def ask(client: anthropic.Anthropic, collection, question: str) -> None:
+def ask(client: anthropic.Anthropic, collection, question: str, save: Path | None = None) -> None:
     hits = retrieve(collection, question)
     print(f"\nTop {len(hits)} chunks:")
     for rank, h in enumerate(hits, 1):
@@ -486,7 +502,21 @@ def ask(client: anthropic.Anthropic, collection, question: str) -> None:
         print(f"  #{rank}  similarity {h['similarity']:.3f}  {h['source']}")
         print(f"      {preview}…")
     print(f"\nAnswer ({MODEL}):\n")
-    print(answer(client, question, hits))
+    reply = answer(client, question, hits)
+    print(reply)
+    if save:
+        save_run(save, hits, reply)
+
+
+def save_run(path: Path, hits: list[dict], reply: str) -> None:
+    """Write the retrieved chunks in full, then a line containing only ANSWER, then Claude's answer."""
+    parts = []
+    for rank, h in enumerate(hits, 1):
+        parts.append(f"Rank: {rank}\nSimilarity: {h['similarity']:.3f}\nSource: {h['source']}\n\n{h['text'].strip()}\n")
+    text = "\n".join(parts) + "\nANSWER\n" + reply.strip() + "\n"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    print(f"\nSaved this run to {path}")
 
 
 # ---------------------------------------------------------------------------
@@ -503,13 +533,22 @@ def load_client() -> anthropic.Anthropic:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Ask questions about the Copperline finance documents.")
+    parser = argparse.ArgumentParser(description="Ask questions about a folder of documents.")
     parser.add_argument("question", nargs="*", help="your question (leave out to ask several in a row)")
     parser.add_argument("--rebuild", action="store_true", help="rebuild the database from the documents folder")
     parser.add_argument("--show-chunks", action="store_true", help="print every chunk in the database")
-    parser.add_argument("--docs", type=Path, default=DOCS_DIR, help=f"documents folder (default: {DOCS_DIR.name})")
+    parser.add_argument("--docs", type=Path, default=DOCS_DIR,
+                        help=f"documents folder (default: week-03/{DOCS_DIR.name}); each folder has its own database")
+    parser.add_argument("--save", type=Path, metavar="PATH",
+                        help="also save the full run (retrieved chunks, then ANSWER, then the answer) to this file")
     args = parser.parse_args()
     docs_dir = args.docs.resolve()
+    if not docs_dir.is_dir() and not args.docs.is_absolute() and (HERE / args.docs).is_dir():
+        docs_dir = (HERE / args.docs).resolve()  # also accept folders named relative to week-03
+    if not docs_dir.is_dir():
+        sys.exit(f"Documents folder not found: {args.docs}")
+    if args.save and not args.question:
+        sys.exit("--save needs a question on the command line.")
 
     client = load_client()
     try:
@@ -528,9 +567,9 @@ def main() -> None:
                 return
 
         if args.question:
-            ask(client, collection, " ".join(args.question))
+            ask(client, collection, " ".join(args.question), args.save)
             return
-        print("Ask a question about the Copperline documents. Press Enter on an empty line to quit.")
+        print(f"Ask a question about the documents in {docs_dir.name}. Press Enter on an empty line to quit.")
         while True:
             try:
                 question = input("\nQuestion: ").strip()

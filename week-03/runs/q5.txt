@@ -1,0 +1,48 @@
+Rank: 1
+Similarity: 0.607
+Source: funds-availability-policy.html
+
+Funds Availability Policy > Mobile check deposits
+Source file: funds-availability-policy.html
+About this document: Version 3 (current). Owner: Deposit Operations.
+Context from elsewhere in this document: States that mobile deposits "follow the same availability as checks deposited at a branch," which is described in Section 4: "For checks deposited at a branch or a Larkfield ATM, the first $275 of the day's check deposits is available on the next business day. The rest of the day's check deposits is available on the second business day after the day of deposit." It also uses the term "business day," defined in Section 2: "A business day is Monday through Friday, except federal holidays..."
+
+Checks deposited with the Larkfield mobile app follow the same availability as checks deposited at a branch. A member can deposit up to $5,000 per business day through the mobile app. Members should keep the paper check for 30 days after a mobile deposit, then destroy it.
+
+Rank: 2
+Similarity: 0.575
+Source: funds-availability-policy.html
+
+Funds Availability Policy > Check deposits
+Source file: funds-availability-policy.html
+About this document: Version 3 (current). Owner: Deposit Operations.
+Context from elsewhere in this document: Uses the term "business day" (e.g., "next business day," "second business day after the day of deposit"), which is defined in Section 2: "A business day is Monday through Friday, except federal holidays. A deposit made before 5 p.m. on a business day is received that day. A deposit made after 5 p.m., or on a weekend or holiday, is received on the next business day."
+
+For checks deposited at a branch or a Larkfield ATM, the first $275 of the day's check deposits is available on the next business day. The rest of the day's check deposits is available on the second business day after the day of deposit.
+
+Rank: 3
+Similarity: 0.491
+Source: funds-availability-policy.html
+
+Funds Availability Policy > Longer holds
+Source file: funds-availability-policy.html
+About this document: Version 3 (current). Owner: Deposit Operations.
+Context from elsewhere in this document: Uses the term "business days," which is defined in Section 2: "A business day is Monday through Friday, except federal holidays. A deposit made before 5 p.m. on a business day is received that day. A deposit made after 5 p.m., or on a weekend or holiday, is received on the next business day."
+
+Larkfield may hold check deposits for up to seven business days when the day's check deposits total more than $6,000, when the account has been open fewer than 30 days, when the account has been overdrawn repeatedly in the last six months, or when there is reason to doubt the check will be paid. The member is told about a longer hold when the deposit is made, or by mail if the hold is placed later.
+
+Rank: 4
+Similarity: 0.471
+Source: funds-availability-policy.html
+
+Funds Availability Policy > Cash, direct deposits, and wire transfers
+Source file: funds-availability-policy.html
+About this document: Version 3 (current). Owner: Deposit Operations.
+Context from elsewhere in this document: Uses the term "business day," which is defined in Section 2: "A business day is Monday through Friday, except federal holidays. A deposit made before 5 p.m. on a business day is received that day. A deposit made after 5 p.m., or on a weekend or holiday, is received on the next business day."
+
+Cash deposited at a branch, direct deposits such as payroll, and incoming wire transfers are available on the business day they are received.
+
+ANSWER
+Based on the policy, for checks deposited at a branch, the first $275 of the day's check deposits is available on the next business day, with the remainder available on the second business day after the deposit [funds-availability-policy.html]. So for a $2,000 paycheck, the member can use **$275** on the next business day, with the remaining $1,725 available on the second business day after the deposit [funds-availability-policy.html].
+
+Note: this assumes no longer hold applies — longer holds (up to seven business days) can be placed in certain circumstances, such as if the account has been open fewer than 30 days, has been repeatedly overdrawn in the last six months, or if there is reason to doubt the check will be paid [funds-availability-policy.html]. The sources don't indicate whether any of those conditions apply to this member.
