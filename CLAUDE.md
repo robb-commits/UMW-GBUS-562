@@ -27,3 +27,8 @@ This repository holds coursework for GBUS 562 (AI Language Models) at the Univer
   - Never push it to GitHub. Before every commit, check the staged changes for the key (`git diff --cached`) and stop if it appears.
   - Never put it in a published artifact or web page. Browser code is readable by anyone who opens the page, so stored keys and Claude calls with a built-in key belong in server-side or command-line code.
   - Don't print or repeat the key in the conversation.
+
+## Agent email file
+
+- `Agent-Email.txt` is in the folder above this repository (outside the repo). Programs we build may read it at run time.
+- Never open, read, print, or search it yourself (no Read, cat, grep, or similar), and never write its contents to any file.
