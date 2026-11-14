@@ -242,3 +242,7 @@ apikey.txt
 *.key
 .env.*
 !.env.example
+
+# Agent login and sender allowlist (kept outside the repo; never commit a copy)
+Agent-Email.txt
+Agent-Allowlist.txt

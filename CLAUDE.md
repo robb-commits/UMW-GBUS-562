@@ -10,6 +10,7 @@ This repository holds coursework for GBUS 562 (AI Language Models) at the Univer
 - Week 1: a single-page Connect 4 game (`week-01/connect-4.html`).
 - Week 2: Prompt Lab, a single-file web app for testing prompts against Claude (`week-02/prompt-lab.html`), plus exported runs and a writeup.
 - Week 3: a RAG command-line tool over Copperline Manufacturing's finance documents (`week-03/ask.py`). Its Chroma database (`week-03/chroma_db/`) is gitignored; rebuild it with `.venv/bin/python week-03/ask.py --rebuild`.
+- Week 4: an HR email agent (`week-04/agent.py`, Claude tool use) with tools from an MCP server (`week-04/hr_mcp_server.py`). `--org` selects an organization folder (`hartwell-hr/` by default, or `ridgeline-hotels/`); each has its own gitignored Chroma database under `week-04/chroma_db/`. Saved runs are in `week-04/runs/`, and the writeup is `week-04/writeup.md`.
 - Commit and push only when asked. Before pushing, fetch first: the user sometimes edits files directly on GitHub.
 
 ## Python
@@ -28,7 +29,7 @@ This repository holds coursework for GBUS 562 (AI Language Models) at the Univer
   - Never put it in a published artifact or web page. Browser code is readable by anyone who opens the page, so stored keys and Claude calls with a built-in key belong in server-side or command-line code.
   - Don't print or repeat the key in the conversation.
 
-## Agent email file
+## Agent email files
 
-- `Agent-Email.txt` is in the folder above this repository (outside the repo). Programs we build may read it at run time.
-- Never open, read, print, or search it yourself (no Read, cat, grep, or similar), and never write its contents to any file.
+- `Agent-Email.txt` (the Gmail sandbox login) and `Agent-Allowlist.txt` (real addresses allowed to use `agent.py --watch`) are in the folder above this repository (outside the repo). Programs we build may read them at run time.
+- Never open, read, print, or search either file yourself (no Read, cat, grep, or similar), and never write their contents to any file.

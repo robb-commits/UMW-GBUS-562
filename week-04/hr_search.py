@@ -1,9 +1,9 @@
-"""Search the Hartwell HR documents: the retrieval half of week-03/ask.py, without Claude.
+"""Search an organization's HR documents: the retrieval half of week-03/ask.py, without Claude.
 
-Each HTML document is split into one chunk per section heading. Every chunk starts with the
+Each organization folder (see orgs.py) has its own hr-docs/ and its own database. Each HTML document is split into one chunk per section heading. Every chunk starts with the
 document title and section heading, the source file and the document's version line, so it makes
-sense on its own. Chunks are stored in a Chroma database in week-04/chroma_db/ using Chroma's
-built-in embedding model. Building the database makes no API calls, so it is rebuilt automatically
+sense on its own. Chunks are stored in a Chroma database in week-04/chroma_db/<organization folder
+name>/ (gitignored) using Chroma's built-in embedding model. Building the database makes no API calls, so it is rebuilt automatically
 whenever the documents change.
 """
 
@@ -19,8 +19,7 @@ from bs4 import BeautifulSoup
 from chromadb.config import Settings
 
 HERE = Path(__file__).resolve().parent
-DOCS_DIR = HERE / "hartwell-hr" / "hr-docs"
-DB_DIR = HERE / "chroma_db" / "hr-docs"
+DB_ROOT = HERE / "chroma_db"
 COLLECTION = "hr-docs"
 TOP_K = 4
 WEAK_MATCH = 0.4  # below this, a chunk is unlikely to answer the question (see the Week 3 runs)
@@ -102,15 +101,25 @@ def make_chunks(path: Path) -> list[dict]:
     return chunks
 
 
-def doc_files() -> list[Path]:
-    return sorted(p for p in DOCS_DIR.rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED)
+def docs_dir(org: Path) -> Path:
+    return org / "hr-docs"
 
 
-def fingerprint(files: list[Path]) -> str:
+def db_dir(org: Path) -> Path:
+    """Each organization gets its own database folder, named after its folder."""
+    return DB_ROOT / org.name
+
+
+def doc_files(org: Path) -> list[Path]:
+    return sorted(p for p in docs_dir(org).rglob("*") if p.is_file() and p.suffix.lower() in SUPPORTED)
+
+
+def fingerprint(org: Path, files: list[Path]) -> str:
     """Changes whenever a document is added, removed or edited."""
     h = hashlib.sha256()
+    h.update(f"{org}\n".encode())  # a different folder with the same name gets a rebuild, not stale results
     for p in files:
-        h.update(f"{p.relative_to(DOCS_DIR)}|{p.stat().st_size}|{p.stat().st_mtime_ns}\n".encode())
+        h.update(f"{p.relative_to(docs_dir(org))}|{p.stat().st_size}|{p.stat().st_mtime_ns}\n".encode())
     return h.hexdigest()[:16]
 
 
@@ -119,23 +128,23 @@ def log(message: str) -> None:
     print(message, file=sys.stderr)
 
 
-def open_db() -> chromadb.ClientAPI:
-    return chromadb.PersistentClient(path=str(DB_DIR), settings=Settings(anonymized_telemetry=False))
+def open_db(org: Path) -> chromadb.ClientAPI:
+    return chromadb.PersistentClient(path=str(db_dir(org)), settings=Settings(anonymized_telemetry=False))
 
 
-def build() -> int:
-    """(Re)build the database from the documents folder and return the number of chunks."""
-    files = doc_files()
+def build(org: Path) -> int:
+    """(Re)build an organization's database from its documents folder and return the number of chunks."""
+    files = doc_files(org)
     if not files:
-        raise RuntimeError(f"No HTML documents found in {DOCS_DIR}")
+        raise RuntimeError(f"No HTML documents found in {docs_dir(org)}")
     chunks = [c for p in files for c in make_chunks(p)]
-    db = open_db()
+    db = open_db(org)
     if COLLECTION in [c.name for c in db.list_collections()]:
         db.delete_collection(COLLECTION)
     collection = db.create_collection(
         COLLECTION,
         configuration={"hnsw": {"space": "cosine"}},  # so similarity = 1 - distance
-        metadata={"fingerprint": fingerprint(files)},
+        metadata={"fingerprint": fingerprint(org, files)},
     )
     with contextlib.redirect_stdout(sys.stderr):  # keep any library output off the MCP channel
         collection.add(
@@ -143,22 +152,22 @@ def build() -> int:
             documents=[c["text"] for c in chunks],
             metadatas=[c["meta"] for c in chunks],
         )
-    log(f"Built the HR database: {len(chunks)} chunks from {len(files)} documents, "
-        f"saved in {DB_DIR.relative_to(HERE)}/.")
+    log(f"Built the {org.name} HR database: {len(chunks)} chunks from {len(files)} documents, "
+        f"saved in {db_dir(org).relative_to(HERE)}/.")
     return len(chunks)
 
 
-def get_collection():
-    """Open the database, building or rebuilding it first if it is missing or out of date."""
-    db = open_db()
+def get_collection(org: Path):
+    """Open the organization's database, building or rebuilding it first if it is missing or out of date."""
+    db = open_db(org)
     names = [c.name for c in db.list_collections()]
     if COLLECTION not in names:
-        log("No HR database yet. Building it now…")
-        build()
-    elif (db.get_collection(COLLECTION).metadata or {}).get("fingerprint") != fingerprint(doc_files()):
-        log("The HR documents changed since the database was built. Rebuilding it now…")
-        build()
-    return open_db().get_collection(COLLECTION)
+        log(f"No {org.name} HR database yet. Building it now…")
+        build(org)
+    elif (db.get_collection(COLLECTION).metadata or {}).get("fingerprint") != fingerprint(org, doc_files(org)):
+        log(f"The {org.name} HR documents changed since the database was built. Rebuilding it now…")
+        build(org)
+    return open_db(org).get_collection(COLLECTION)
 
 
 def search(collection, query: str, k: int = TOP_K) -> list[dict]:
