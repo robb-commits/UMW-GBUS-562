@@ -1,0 +1,286 @@
+From: Karen Walsh <k.walsh@northgatedrive.example>
+Subject: PO-7781 - MC-500 controllers - revised shipment schedule
+Email: 01-northgate-controller-delay.eml
+Coordinator: fixed pipeline
+======================================================================
+
+--- Step 1 of 3: supply analyst ---
+
+--- Supply analyst ---
+
+>>> Handoff: pipeline -> supply analyst: the supplier email 01-northgate-controller-delay.eml
+Tools offered: get_part, get_orders_for_part, check_coverage
+  [supply analyst tokens: 2,237 in, 146 out]
+
+Analyst tool call 1 of 10: get_part
+  Inputs: {"part_id": "MC-500"}
+  Result: {
+  "part_id": "MC-500",
+  "description": "Motor controller",
+  "supplier": "Northgate Drive Systems",
+  "on_hand": 40,
+  "scheduled_shipments": [
+    {
+      "po_number": "PO-7781",
+      "supplier": "Northgate Drive Systems",
+      "qty": 400,
+      "arrives_in_days": 5
+    }
+  ],
+  "used_in": [
+ …
+
+Analyst tool call 2 of 10: get_orders_for_part
+  Inputs: {"part_id": "MC-500"}
+  Result: {
+  "part_id": "MC-500",
+  "orders": [
+    {
+      "order_id": "O-1041",
+      "customer": "Riverside Cycles",
+      "model": "Commuter E",
+      "bikes": 40,
+      "units_needed": 40,
+      "ship_day": 7,
+      "late_penalty": "no"
+    },
+    {
+      "order_id": "O-1042",
+      "customer": "Blue Ri…
+  [supply analyst tokens: 3,331 in, 166 out]
+
+Analyst tool call 3 of 10: check_coverage
+  Inputs: {"part_id": "MC-500", "arrivals": [{"qty": 120, "arrives_in_days": 5}, {"qty": 280, "arrives_in_days": 26}]}
+  Result: {
+  "part_id": "MC-500",
+  "on_hand": 40,
+  "arrivals_used": [
+    {
+      "qty": 120,
+      "arrives_in_days": 5
+    },
+    {
+      "qty": 280,
+      "arrives_in_days": 26
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 440,
+  "total_needed": 340,
+  "orders": [
+    …
+  [supply analyst tokens: 4,653 in, 467 out]
+
+>>> Handoff: supply analyst -> pipeline: brief on MC-500; orders at risk: O-1043, O-1044, O-1045
+{
+  "part_id": "MC-500",
+  "what_changed": "Of the 400 controllers on PO-7781, only 120 will arrive on the originally scheduled day (day 5), with the remaining 280 now arriving 21 days later (day 26) instead of all 400 on day 5.",
+  "orders_at_risk": [
+    {
+      "order_id": "O-1043",
+      "customer": "City of Ashford Bike Share",
+      "units_short": 10,
+      "ship_day": 14,
+      "ready_day": 26,
+      "late_penalty": "yes"
+    },
+    {
+      "order_id": "O-1044",
+      "customer": "Main Street Bikes",
+      "units_short": 30,
+      "ship_day": 18,
+      "ready_day": 26,
+      "late_penalty": "no"
+    },
+    {
+      "order_id": "O-1045",
+      "customer": "Lakeview Rentals",
+      "units_short": 50,
+      "ship_day": 21,
+      "ready_day": 26,
+      "late_penalty": "no"
+    }
+  ],
+  "options": [],
+  "decisions_for_a_person": [
+    "Decide whether to accept the revised 120-now/280-in-21-days schedule or pursue alternative sourcing/expediting with Northgate Drive Systems to avoid delays on orders O-1043, O-1044, and O-1045.",
+    "Consider whether to discuss expedite options with the supplier this week as offered, especially given O-1043 carries a late penalty."
+  ],
+  "supplier_questions": [
+    "Which of your customers are most affected by this delay?"
+  ]
+}
+
+--- Step 2 of 3: customer notices ---
+
+--- Customer notice ---
+
+>>> Handoff: pipeline -> customer writer: the facts of order O-1043 only
+  [customer writer tokens: 364 in, 184 out]
+Subject: Update on Order O-1043
+
+Dear City of Ashford Bike Share,
+
+We're writing to update you on Order O-1043 for 100 Commuter E bikes. This order is now expected to ship 12 days later than originally planned, going out in 26 days from today instead of the original 14.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We will keep you informed if there are any further updates regarding your order's timeline.
+
+Thank you for your patience and understanding.
+
+Customer Service, Brookfield Bicycle Company
+
+>>> Handoff: customer writer -> reviewer: the customer notice draft and its facts (recipient: customer)
+  [reviewer tokens: 654 in, 283 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the customer notice draft (reviewer's verdict: APPROVE)
+Name check: passed (no supplier names found)
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/pipeline/01-northgate-controller-delay/notice-O-1043--NEEDS-PERSON.txt (NEEDS A PERSON: the order has a late penalty)
+
+--- Customer notice ---
+
+>>> Handoff: pipeline -> customer writer: the facts of order O-1044 only
+  [customer writer tokens: 361 in, 161 out]
+Subject: Update on Order O-1044
+
+Dear Main Street Bikes,
+
+We're writing to update you on Order O-1044 for 30 Cargo E bikes. This order is now expected to ship 8 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We will keep you informed of any further updates regarding your order's progress.
+
+Thank you for your patience and understanding.
+
+Customer Service, Brookfield Bicycle Company
+
+>>> Handoff: customer writer -> reviewer: the customer notice draft and its facts (recipient: customer)
+  [reviewer tokens: 628 in, 371 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the customer notice draft (reviewer's verdict: APPROVE)
+Name check: passed (no supplier names found)
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/pipeline/01-northgate-controller-delay/notice-O-1044.txt (approved by the reviewer; name check passed)
+
+--- Customer notice ---
+
+>>> Handoff: pipeline -> customer writer: the facts of order O-1045 only
+  [customer writer tokens: 362 in, 156 out]
+Subject: Update on Order O-1045
+
+Dear Lakeview Rentals,
+
+We're writing to update you on Order O-1045 for 50 Commuter E bikes. This order is now expected to ship 5 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We will keep you informed of any further updates regarding your order.
+
+Thank you for your understanding.
+
+Customer Service, Brookfield Bicycle Company
+
+>>> Handoff: customer writer -> reviewer: the customer notice draft and its facts (recipient: customer)
+  [reviewer tokens: 624 in, 470 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the customer notice draft (reviewer's verdict: APPROVE)
+Name check: passed (no supplier names found)
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/pipeline/01-northgate-controller-delay/notice-O-1045.txt (approved by the reviewer; name check passed)
+
+--- Step 3 of 3: supplier reply ---
+
+--- Supplier reply ---
+
+>>> Handoff: pipeline -> supplier writer: the supplier's email and the brief, customer names removed
+  [supplier writer tokens: 1,224 in, 680 out]
+Subject: RE: PO-7781 - MC-500 controllers - revised shipment schedule
+
+Hello Karen,
+
+Thank you for the update. To confirm our understanding: of the 400 MC-500 controllers on PO-7781, 120 units will ship on the original scheduled date (day 5), with the remaining 280 units now shipping 21 days later (day 26) instead of all 400 on day 5.
+
+This change affects three of our orders:
+- One order short 10 units, delayed 12 days, with a late penalty applying.
+- One order short 30 units, delayed 8 days.
+- One order short 50 units, delayed 5 days.
+
+That is a total of 90 units affected across these orders due to the schedule change.
+
+We are not able to share details about our customers or their orders.
+
+Given the penalty exposure on the most time-sensitive order, please let us know if there is any way to ship additional units sooner than day 26 — even a partial early shipment would help reduce the impact. If you have options to expedite any portion of the 280 units, we'd like to hear them.
+
+We will confirm our decision on how to proceed by the time you requested this week.
+
+Regards,
+Purchasing, Brookfield Bicycle Company
+
+>>> Handoff: supplier writer -> reviewer: the supplier reply draft and its facts (recipient: supplier)
+  [reviewer tokens: 1,648 in, 802 out]
+APPROVE/REVISE: 
+
+REVISE
+
+- Rule 3 (and the security rule against revealing customer orders to a supplier): The draft describes the details of three internal customer orders (units short, delay length, and penalty status) to the supplier. Even without naming the customers or order IDs, this discloses specific customer order information that should not be shared with a supplier. Remove all order-specific details (units short, delay days, penalty status, total units affected) and instead speak only in general terms, e.g., "This change affects several of our customer orders, including at least one with penalty exposure. We are not able to share further details about our customers or their orders."
+
+>>> Handoff: reviewer -> supplier writer: REVISE with reasons (revision 1 of 2)
+  [supplier writer tokens: 1,839 in, 303 out]
+Subject: RE: PO-7781 - MC-500 controllers - revised shipment schedule
+
+Hello Karen,
+
+Thank you for the update. To confirm our understanding: of the 400 MC-500 controllers on PO-7781, 120 units will ship on the original scheduled date (day 5), with the remaining 280 units now shipping 21 days later (day 26) instead of all 400 on day 5.
+
+This change affects several of our customer orders, including at least one with penalty exposure. We are not able to share further details about our customers or their orders.
+
+Given that penalty exposure, please let us know if there is any way to ship additional units sooner than day 26 — even a partial early shipment would help reduce the impact. If you have options to expedite any portion of the 280 units, we'd like to hear them.
+
+We will confirm our decision on how to proceed by the time you requested this week.
+
+Regards,
+Purchasing, Brookfield Bicycle Company
+
+>>> Handoff: supplier writer -> reviewer: the supplier reply draft and its facts (recipient: supplier)
+  [reviewer tokens: 1,565 in, 366 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the supplier reply draft (reviewer's verdict: APPROVE)
+Name check: passed (no customer names found)
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/pipeline/01-northgate-controller-delay/supplier-reply.txt (approved by the reviewer after 1 revision; name check passed)
+
+======================================================================
+SUMMARY
+======================================================================
+What changed: Of the 400 controllers on PO-7781, only 120 will arrive on the originally scheduled day (day 5), with the remaining 280 now arriving 21 days later (day 26) instead of all 400 on day 5.
+Orders at risk: O-1043, O-1044, O-1045
+
+Drafts saved (4):
+  - supplier reply: week-05/drafts/pipeline/01-northgate-controller-delay/supplier-reply.txt
+  - customer notice: week-05/drafts/pipeline/01-northgate-controller-delay/notice-O-1043--NEEDS-PERSON.txt
+  - customer notice: week-05/drafts/pipeline/01-northgate-controller-delay/notice-O-1044.txt
+  - customer notice: week-05/drafts/pipeline/01-northgate-controller-delay/notice-O-1045.txt
+
+Drafts marked for a person (1):
+  - notice-O-1043: the order has a late penalty
+
+Decisions for a person (2):
+  - Decide whether to accept the revised 120-now/280-in-21-days schedule or pursue alternative sourcing/expediting with Northgate Drive Systems to avoid delays on orders O-1043, O-1044, and O-1045.
+  - Consider whether to discuss expedite options with the supplier this week as offered, especially given O-1043 carries a late penalty.
+  (The supplier asked: Which of your customers are most affected by this delay?)
+
+Tokens by specialist:
+  supply analyst               3 Claude calls, 10,221 input tokens, 779 output tokens
+  supplier writer              2 Claude calls, 3,063 input tokens, 983 output tokens
+  customer writer              3 Claude calls, 1,087 input tokens, 501 output tokens
+  reviewer                     5 Claude calls, 5,119 input tokens, 2,292 output tokens
+  total                        13 Claude calls, 19,490 input tokens, 4,555 output tokens
+
+Saved this output to week-05/runs/01-pipeline.txt

@@ -1,0 +1,207 @@
+From: Lisa Moreno <l.moreno@kendalltire.example>
+Subject: PO-7795 - TR-29 tires - two options, please choose
+Email: 02-kendall-tire-options.eml
+Coordinator: orchestrator agent
+======================================================================
+Tools offered: run_supply_analyst, draft_supplier_reply, draft_customer_notice, finish
+
+Orchestrator step 1: run_supply_analyst
+  Inputs: {}
+
+--- Orchestrator's choice 1 of at most 10: run_supply_analyst ---
+
+--- Supply analyst ---
+
+>>> Handoff: orchestrator -> supply analyst: the supplier email 02-kendall-tire-options.eml
+Tools offered: get_part, get_orders_for_part, check_coverage
+  [supply analyst tokens: 2,244 in, 120 out]
+
+Analyst tool call 1 of 10: get_part
+  Inputs: {"part_id": "TR-29"}
+  Result: {
+  "part_id": "TR-29",
+  "description": "29-inch trail tire",
+  "supplier": "Kendall Tire Supply",
+  "on_hand": 120,
+  "scheduled_shipments": [
+    {
+      "po_number": "PO-7795",
+      "supplier": "Kendall Tire Supply",
+      "qty": 400,
+      "arrives_in_days": 8
+    }
+  ],
+  "used_in": [
+    {
+ …
+
+Analyst tool call 2 of 10: get_orders_for_part
+  Inputs: {"part_id": "TR-29"}
+  Result: {
+  "part_id": "TR-29",
+  "orders": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hilltop Outfitters",
+      "model": "Trail 29",
+      "bikes": 80,
+      "units_needed": 160,
+      "ship_day": 9,
+      "late_penalty": "no"
+    },
+    {
+      "order_id": "O-1049",
+      "customer": "Pine Va…
+  [supply analyst tokens: 2,915 in, 377 out]
+
+Analyst tool call 3 of 10: check_coverage
+  Inputs: {"part_id": "TR-29", "arrivals": [{"qty": 160, "arrives_in_days": 8}, {"qty": 240, "arrives_in_days": 22}]}
+  Result: {
+  "part_id": "TR-29",
+  "on_hand": 120,
+  "arrivals_used": [
+    {
+      "qty": 160,
+      "arrives_in_days": 8
+    },
+    {
+      "qty": 240,
+      "arrives_in_days": 22
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 520,
+  "total_needed": 300,
+  "orders": [
+    …
+
+Analyst tool call 4 of 10: check_coverage
+  Inputs: {"part_id": "TR-29", "arrivals": [{"qty": 400, "arrives_in_days": 12}]}
+  Result: {
+  "part_id": "TR-29",
+  "on_hand": 120,
+  "arrivals_used": [
+    {
+      "qty": 400,
+      "arrives_in_days": 12
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 520,
+  "total_needed": 300,
+  "orders": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hilltop O…
+  [supply analyst tokens: 4,622 in, 388 out]
+
+>>> Handoff: supply analyst -> orchestrator: brief on TR-29; orders at risk: O-1046
+{
+  "part_id": "TR-29",
+  "what_changed": "PO-7795's 400 tires will no longer arrive as a single shipment in 8 days; Option 1 delivers 160 in 8 days and the remaining 240 in 22 days, while Option 2 delivers all 400 together in 12 days.",
+  "orders_at_risk": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hilltop Outfitters",
+      "units_short": 40,
+      "ship_day": 9,
+      "ready_day": 12,
+      "late_penalty": "no"
+    }
+  ],
+  "options": [
+    {
+      "name": "Option 1",
+      "order_ids": []
+    },
+    {
+      "name": "Option 2",
+      "order_ids": [
+        "O-1046"
+      ]
+    }
+  ],
+  "decisions_for_a_person": [
+    "Choose between Option 1 (split shipment: 160 in 8 days, 240 in 22 days, no orders at risk) and Option 2 (single shipment in 12 days, which puts order O-1046 at risk with a 3-day delay and 40 units short) within the supplier's two-business-day deadline, or the supplier will default to Option 2."
+  ],
+  "supplier_questions": [
+    "Which option (1 or 2) do you prefer for PO-7795?"
+  ]
+}
+  Result: {"part_id": "TR-29", "what_changed": "PO-7795's 400 tires will no longer arrive as a single shipment in 8 days; Option 1 delivers 160 in 8 days and the remaining 240 in 22 days, while Option 2 delivers all 400 together in 12 days.", "orders_at_risk": [{"order_id": "O-1046", "customer": "Hilltop Outf…
+
+Orchestrator step 2: draft_customer_notice
+  Inputs: {"order_id": "O-1046"}
+
+--- Orchestrator's choice 2 of at most 10: draft_customer_notice for O-1046 ---
+
+--- Customer notice ---
+
+>>> Handoff: orchestrator -> customer writer: the facts of order O-1046 only
+  [customer writer tokens: 363 in, 166 out]
+Subject: Shipping Update for Order O-1046
+
+Dear Hilltop Outfitters,
+
+We're writing to update you on Order O-1046 for 80 Trail 29 bikes. This order is now expected to ship 3 days later than planned.
+
+We apologize for this delay. It was caused by a delay in a part from one of our suppliers.
+
+We appreciate your patience and will keep you informed of any further updates regarding this order.
+
+Customer Service, Brookfield Bicycle Company
+
+>>> Handoff: customer writer -> reviewer: the customer notice draft and its facts (recipient: customer)
+  [reviewer tokens: 627 in, 341 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the customer notice draft (reviewer's verdict: APPROVE)
+Name check: passed (no supplier names found)
+
+>>> Handoff: name check (code) -> orchestrator: week-05/drafts/orchestrator/02-kendall-tire-options/notice-O-1046.txt (approved by the reviewer; name check passed)
+  Result: The customer notice was drafted, reviewed and saved for a person to check, not sent. Status: approved by the reviewer; name check passed
+
+To: Hilltop Outfitters <buying@hilltopoutfitters.example>
+Subject: Your order O-1046: updated ship date
+
+Subject: Shipping Update for Order O-1046
+
+Dear Hilltop O…
+
+Orchestrator step 3: finish
+  Inputs: {"needs_decision": true, "summary": "Kendall Tire Supply (PO-7795, 400 TR-29 tires) reports a machine outage and offers two options: (1) split shipment - 160 tires in 8 days, remaining 240 in 22 days, no customer orders affected; or (2) hold and ship all 400 together in 12 days, which delays order O-1046 (Hilltop Outfitters, 40 units short, no contractual penalty) by about 3 days. Supplier will default to Option 2 if we don't respond within 2 business days. A draft customer notice for O-1046 has been prepared and saved for review in case the delay occurs. Please choose Option 1 or 2 and reply to the supplier before the deadline; no reply has been sent to the supplier yet pending this decision."}
+
+--- Orchestrator's choice 3 of at most 10: finish ---
+  Result: Finished.
+
+======================================================================
+SUMMARY
+======================================================================
+From the orchestrator:
+Kendall Tire Supply (PO-7795, 400 TR-29 tires) reports a machine outage and offers two options: (1) split shipment - 160 tires in 8 days, remaining 240 in 22 days, no customer orders affected; or (2) hold and ship all 400 together in 12 days, which delays order O-1046 (Hilltop Outfitters, 40 units short, no contractual penalty) by about 3 days. Supplier will default to Option 2 if we don't respond within 2 business days. A draft customer notice for O-1046 has been prepared and saved for review in case the delay occurs. Please choose Option 1 or 2 and reply to the supplier before the deadline; no reply has been sent to the supplier yet pending this decision.
+
+What changed: PO-7795's 400 tires will no longer arrive as a single shipment in 8 days; Option 1 delivers 160 in 8 days and the remaining 240 in 22 days, while Option 2 delivers all 400 together in 12 days.
+Orders at risk: O-1046
+
+Drafts saved (1):
+  - customer notice: week-05/drafts/orchestrator/02-kendall-tire-options/notice-O-1046.txt
+  (No supplier reply was drafted.)
+
+Drafts marked for a person (0):
+  none
+
+Decisions for a person (1):
+  - Choose between Option 1 (split shipment: 160 in 8 days, 240 in 22 days, no orders at risk) and Option 2 (single shipment in 12 days, which puts order O-1046 at risk with a 3-day delay and 40 units short) within the supplier's two-business-day deadline, or the supplier will default to Option 2.
+  (The supplier asked: Which option (1 or 2) do you prefer for PO-7795?)
+
+A person must make a decision: yes
+
+Tokens by specialist:
+  supply analyst               3 Claude calls, 9,781 input tokens, 885 output tokens
+  supplier writer              0 Claude calls, 0 input tokens, 0 output tokens
+  customer writer              1 Claude calls, 363 input tokens, 166 output tokens
+  reviewer                     1 Claude calls, 627 input tokens, 341 output tokens
+  orchestrator (coordinator)   3 Claude calls, 6,687 input tokens, 1,047 output tokens
+  total                        8 Claude calls, 17,458 input tokens, 2,439 output tokens
+
+Saved this output to week-05/runs/orchestrator-02.txt
