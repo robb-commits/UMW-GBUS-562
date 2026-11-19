@@ -1,0 +1,22 @@
+To: Hilltop Outfitters <buying@hilltopoutfitters.example>
+Subject: Your order O-1046: updated ship date
+Status: approved by the reviewer; name check passed
+
+DRAFT
+Subject: Update on Order O-1046
+
+Dear Hilltop Outfitters,
+
+We're writing to let you know that Order O-1046, for 80 Trail 29 bikes, is now expected to ship 3 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We understand timing is important to your business and will keep you informed if anything further changes with this order.
+
+Thank you for your patience and continued partnership with Brookfield Bicycle Company.
+
+Customer Service
+Brookfield Bicycle Company
+
+--- Reviewer ---
+APPROVE

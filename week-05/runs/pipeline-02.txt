@@ -1,0 +1,262 @@
+From: Lisa Moreno <l.moreno@kendalltire.example>
+Subject: PO-7795 - TR-29 tires - two options, please choose
+Email: 02-kendall-tire-options.eml
+Coordinator: fixed pipeline
+======================================================================
+
+--- Step 1 of 3: supply analyst ---
+
+--- Supply analyst ---
+
+>>> Handoff: pipeline -> supply analyst: the supplier email 02-kendall-tire-options.eml
+Tools offered: get_part, get_orders_for_part, check_coverage
+  [supply analyst tokens: 2,244 in, 117 out]
+
+Analyst tool call 1 of 10: get_part
+  Inputs: {"part_id": "TR-29"}
+  Result: {
+  "part_id": "TR-29",
+  "description": "29-inch trail tire",
+  "supplier": "Kendall Tire Supply",
+  "on_hand": 120,
+  "scheduled_shipments": [
+    {
+      "po_number": "PO-7795",
+      "supplier": "Kendall Tire Supply",
+      "qty": 400,
+      "arrives_in_days": 8
+    }
+  ],
+  "used_in": [
+    {
+ …
+
+Analyst tool call 2 of 10: get_orders_for_part
+  Inputs: {"part_id": "TR-29"}
+  Result: {
+  "part_id": "TR-29",
+  "orders": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hilltop Outfitters",
+      "model": "Trail 29",
+      "bikes": 80,
+      "units_needed": 160,
+      "ship_day": 9,
+      "late_penalty": "no"
+    },
+    {
+      "order_id": "O-1049",
+      "customer": "Pine Va…
+  [supply analyst tokens: 2,912 in, 333 out]
+
+Analyst tool call 3 of 10: check_coverage
+  Inputs: {"part_id": "TR-29"}
+  Result: {
+  "part_id": "TR-29",
+  "on_hand": 120,
+  "arrivals_used": [
+    {
+      "qty": 400,
+      "arrives_in_days": 8
+    }
+  ],
+  "arrivals_source": "scheduled shipments in inbound.csv",
+  "total_supply": 520,
+  "total_needed": 300,
+  "orders": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hil…
+
+Analyst tool call 4 of 10: check_coverage
+  Inputs: {"part_id": "TR-29", "arrivals": [{"qty": 160, "arrives_in_days": 8}, {"qty": 240, "arrives_in_days": 22}]}
+  Result: {
+  "part_id": "TR-29",
+  "on_hand": 120,
+  "arrivals_used": [
+    {
+      "qty": 160,
+      "arrives_in_days": 8
+    },
+    {
+      "qty": 240,
+      "arrives_in_days": 22
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 520,
+  "total_needed": 300,
+  "orders": [
+    …
+
+Analyst tool call 5 of 10: check_coverage
+  Inputs: {"part_id": "TR-29", "arrivals": [{"qty": 400, "arrives_in_days": 12}]}
+  Result: {
+  "part_id": "TR-29",
+  "on_hand": 120,
+  "arrivals_used": [
+    {
+      "qty": 400,
+      "arrives_in_days": 12
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 520,
+  "total_needed": 300,
+  "orders": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hilltop O…
+  [supply analyst tokens: 5,219 in, 556 out]
+
+>>> Handoff: supply analyst -> pipeline: brief on TR-29; orders at risk: O-1046
+{
+  "part_id": "TR-29",
+  "what_changed": "Supplier offers to split PO-7795 into 160 tires arriving in 8 days and 240 tires arriving in 22 days (Option 1), or hold and ship all 400 tires together in 12 days (Option 2), instead of the original single 400-unit arrival in 8 days.",
+  "orders_at_risk": [
+    {
+      "order_id": "O-1046",
+      "customer": "Hilltop Outfitters",
+      "units_short": 40,
+      "ship_day": 9,
+      "ready_day": 12,
+      "late_penalty": "no"
+    }
+  ],
+  "options": [
+    {
+      "name": "Option 1",
+      "order_ids": []
+    },
+    {
+      "name": "Option 2",
+      "order_ids": [
+        "O-1046"
+      ]
+    }
+  ],
+  "decisions_for_a_person": [
+    "Choose between Option 1 (split shipment: 160 tires in 8 days, 240 tires in 22 days) which keeps all current orders on schedule, and Option 2 (all 400 tires together in 12 days) which would make order O-1046 (Hilltop Outfitters) 3 days late, short 40 units.",
+    "Reply to Kendall Tire Supply within two business days, or they will default to Option 2."
+  ],
+  "supplier_questions": [
+    "Which option (1 or 2) does Brookfield prefer for PO-7795?"
+  ]
+}
+
+--- Step 2 of 3: customer notices ---
+
+--- Customer notice ---
+
+>>> Handoff: pipeline -> customer writer: the facts of order O-1046 only
+  [customer writer tokens: 363 in, 192 out]
+Subject: Update on Order O-1046
+
+Dear Hilltop Outfitters,
+
+We're writing to let you know that Order O-1046, for 80 Trail 29 bikes, is now expected to ship 3 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We understand timing is important to your business and will keep you informed if anything further changes with this order.
+
+Thank you for your patience and continued partnership with Brookfield Bicycle Company.
+
+Customer Service
+Brookfield Bicycle Company
+
+>>> Handoff: customer writer -> reviewer: the customer notice draft and its facts (recipient: customer)
+  [reviewer tokens: 653 in, 262 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the customer notice draft (reviewer's verdict: APPROVE)
+Name check: passed (no supplier names found)
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/pipeline/02-kendall-tire-options/notice-O-1046.txt (approved by the reviewer; name check passed)
+
+--- Step 3 of 3: supplier reply ---
+
+--- Supplier reply ---
+
+>>> Handoff: pipeline -> supplier writer: the supplier's email and the brief, customer names removed
+  [supplier writer tokens: 1,212 in, 297 out]
+Subject: RE: PO-7795 - TR-29 tires - two options, please choose
+
+Hi Lisa,
+
+Thanks for the heads-up on PO-7795. To confirm our understanding:
+
+- Option 1: 160 tires in 8 days, remaining 240 in 22 days
+- Option 2: all 400 tires together in 12 days
+
+Impact on our side: Option 2 would leave one of our orders short 40 units and delayed by 3 days versus the original schedule. Option 1, as described, does not create that shortfall.
+
+We are reviewing internally and will confirm our choice within the two-business-day window you've given us.
+
+In the meantime, is there any way to get more than 160 tires out on the original 8-day date, or to pull the 22-day portion in sooner? Either would help reduce the impact on our schedule.
+
+Thanks for working with us on this.
+
+Purchasing, Brookfield Bicycle Company
+
+>>> Handoff: supplier writer -> reviewer: the supplier reply draft and its facts (recipient: supplier)
+  [reviewer tokens: 1,547 in, 591 out]
+APPROVE/REVISE: REVISE
+
+3. The draft describes a customer's order impact to the supplier ("one of our orders short 40 units and delayed by 3 days"). Remove this order-specific detail—do not reveal internal order quantities, delays, or any customer-order information to the supplier. Keep the supplier-facing reply limited to acknowledging receipt of the options and the review timeline, without disclosing which orders are affected or by how much.
+
+>>> Handoff: reviewer -> supplier writer: REVISE with reasons (revision 1 of 2)
+  [supplier writer tokens: 1,681 in, 455 out]
+Subject: RE: PO-7795 - TR-29 tires - two options, please choose
+
+Hi Lisa,
+
+Thanks for the heads-up on PO-7795. To confirm our understanding:
+
+- Option 1: 160 tires in 8 days, remaining 240 in 22 days
+- Option 2: all 400 tires together in 12 days
+
+We are reviewing internally and will confirm our choice within the two-business-day window you've given us.
+
+In the meantime, is there any way to get more than 160 tires out on the original 8-day date, or to pull the 22-day portion in sooner? Either would help us on our end.
+
+Thanks for working with us on this.
+
+Purchasing, Brookfield Bicycle Company
+
+>>> Handoff: supplier writer -> reviewer: the supplier reply draft and its facts (recipient: supplier)
+  [reviewer tokens: 1,480 in, 7 out]
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the supplier reply draft (reviewer's verdict: APPROVE)
+Name check: passed (no customer names found)
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/pipeline/02-kendall-tire-options/supplier-reply.txt (approved by the reviewer after 1 revision; name check passed)
+
+======================================================================
+SUMMARY
+======================================================================
+What changed: Supplier offers to split PO-7795 into 160 tires arriving in 8 days and 240 tires arriving in 22 days (Option 1), or hold and ship all 400 tires together in 12 days (Option 2), instead of the original single 400-unit arrival in 8 days.
+Orders at risk: O-1046
+
+Drafts saved (2):
+  - supplier reply: week-05/drafts/pipeline/02-kendall-tire-options/supplier-reply.txt
+  - customer notice: week-05/drafts/pipeline/02-kendall-tire-options/notice-O-1046.txt
+
+Drafts marked for a person (0):
+  none
+
+Decisions for a person (2):
+  - Choose between Option 1 (split shipment: 160 tires in 8 days, 240 tires in 22 days) which keeps all current orders on schedule, and Option 2 (all 400 tires together in 12 days) which would make order O-1046 (Hilltop Outfitters) 3 days late, short 40 units.
+  - Reply to Kendall Tire Supply within two business days, or they will default to Option 2.
+  (The supplier asked: Which option (1 or 2) does Brookfield prefer for PO-7795?)
+
+Tokens by specialist:
+  supply analyst               3 Claude calls, 10,375 input tokens, 1,006 output tokens
+  supplier writer              2 Claude calls, 2,893 input tokens, 752 output tokens
+  customer writer              1 Claude calls, 363 input tokens, 192 output tokens
+  reviewer                     3 Claude calls, 3,680 input tokens, 860 output tokens
+  total                        9 Claude calls, 17,311 input tokens, 2,810 output tokens
+
+Saved this output to week-05/runs/pipeline-02.txt
