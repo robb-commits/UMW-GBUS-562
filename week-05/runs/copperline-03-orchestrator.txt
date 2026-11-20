@@ -1,0 +1,146 @@
+Company: Copperline (copperline-coffee)
+From: Priya Raman <p.raman@ashgroveprecision.example>
+Subject: PO-5531 - BR-64 burr sets - arriving 3 days late
+Email: 03-ashgrove-burr-delay.eml
+Coordinator: orchestrator agent
+======================================================================
+Source email:
+Hello,
+
+A heat-treatment furnace at our plant needed an unplanned repair, so PO-5531
+for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full
+quantity will ship together.
+
+Please let me know if this causes any problems on your side.
+
+Best,
+Priya Raman
+Order Management, Ashgrove Precision
+======================================================================
+Tools offered: run_supply_analyst, draft_supplier_reply, draft_customer_notice, finish
+
+Orchestrator step 1: run_supply_analyst
+  Inputs: {}
+
+--- Orchestrator's choice 1 of at most 10: run_supply_analyst ---
+
+--- Supply analyst ---
+
+>>> Handoff: orchestrator -> supply analyst: the supplier email 03-ashgrove-burr-delay.eml
+Tools offered: get_part, get_orders_for_part, check_coverage
+  [supply analyst tokens: 2,312 in, 125 out]
+
+Analyst tool call 1 of 10: get_part
+  Inputs: {"part_id": "BR-64"}
+  Result: {
+  "part_id": "BR-64",
+  "description": "64 mm burr set",
+  "supplier": "Ashgrove Precision",
+  "on_hand": 70,
+  "scheduled_shipments": [
+    {
+      "po_number": "PO-5531",
+      "supplier": "Ashgrove Precision",
+      "qty": 120,
+      "arrives_in_days": 10
+    }
+  ],
+  "used_in": [
+    {
+      "…
+
+Analyst tool call 2 of 10: get_orders_for_part
+  Inputs: {"part_id": "BR-64"}
+  Result: {
+  "part_id": "BR-64",
+  "orders": [
+    {
+      "order_id": "O-2206",
+      "customer": "Grindstone Coffee Bar",
+      "product": "Grinder 64",
+      "quantity": 30,
+      "units_needed": 30,
+      "ship_day": 8,
+      "late_penalty": "no"
+    },
+    {
+      "order_id": "O-2207",
+      "customer":…
+  [supply analyst tokens: 2,985 in, 144 out]
+
+Analyst tool call 3 of 10: check_coverage
+  Inputs: {"part_id": "BR-64", "arrivals": [{"qty": 120, "arrives_in_days": 13}]}
+  Result: {
+  "part_id": "BR-64",
+  "on_hand": 70,
+  "arrivals_used": [
+    {
+      "qty": 120,
+      "arrives_in_days": 13
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 190,
+  "total_needed": 115,
+  "orders": [
+    {
+      "order_id": "O-2206",
+      "customer": "Grindstone…
+  [supply analyst tokens: 3,747 in, 148 out]
+
+>>> Handoff: supply analyst -> orchestrator: brief on BR-64; orders at risk: none
+Full analyst brief:
+{
+  "part_id": "BR-64",
+  "what_changed": "PO-5531's 120 BR-64 burr sets, originally due in 10 days, will now arrive together in 13 days.",
+  "orders_at_risk": [],
+  "options": [],
+  "decisions_for_a_person": [],
+  "supplier_questions": [
+    "Priya asked Copperline to let her know if the 3-day delay causes any problems."
+  ]
+}
+
+Check the analyst's reading against the source email (printed at the top):
+  Analyst's reading: PO-5531's 120 BR-64 burr sets, originally due in 10 days, will now arrive together in 13 days.
+  Result: the analyst's brief (printed in full above)
+
+Orchestrator step 2: finish
+  Inputs: {"summary": "Ashgrove Precision reported PO-5531 (120 BR-64 burr sets) will arrive 3 days late due to a furnace repair. Supply analyst found no customer orders at risk from this delay, and the email only asked for feedback, not a decision. No reply or customer notice needed; filed for awareness only.", "needs_decision": false}
+
+--- Orchestrator's choice 2 of at most 10: finish ---
+  Result: Finished.
+
+======================================================================
+SUMMARY
+======================================================================
+Run complete.
+
+From the orchestrator:
+Ashgrove Precision reported PO-5531 (120 BR-64 burr sets) will arrive 3 days late due to a furnace repair. Supply analyst found no customer orders at risk from this delay, and the email only asked for feedback, not a decision. No reply or customer notice needed; filed for awareness only.
+
+What changed: PO-5531's 120 BR-64 burr sets, originally due in 10 days, will now arrive together in 13 days.
+Orders at risk: none
+
+Drafts saved (0):
+  none
+  (No supplier reply was drafted.)
+
+Drafts marked for a person (0):
+  none
+
+Decisions for a person (0):
+  none
+  (The supplier asked: Priya asked Copperline to let her know if the 3-day delay causes any problems.)
+
+A person must make a decision: no
+
+Tokens by specialist:
+  supply analyst               3 Claude calls, 9,044 input tokens, 417 output tokens
+  supplier writer              0 Claude calls, 0 input tokens, 0 output tokens
+  customer writer              0 Claude calls, 0 input tokens, 0 output tokens
+  reviewer                     0 Claude calls, 0 input tokens, 0 output tokens
+  orchestrator (coordinator)   2 Claude calls, 4,268 input tokens, 698 output tokens
+  total                        5 Claude calls, 13,312 input tokens, 1,115 output tokens
+
+Saved this output to week-05/runs/copperline-03-orchestrator.txt

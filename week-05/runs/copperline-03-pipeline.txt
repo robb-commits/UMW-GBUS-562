@@ -1,0 +1,165 @@
+Company: Copperline (copperline-coffee)
+From: Priya Raman <p.raman@ashgroveprecision.example>
+Subject: PO-5531 - BR-64 burr sets - arriving 3 days late
+Email: 03-ashgrove-burr-delay.eml
+Coordinator: fixed pipeline
+======================================================================
+Source email:
+Hello,
+
+A heat-treatment furnace at our plant needed an unplanned repair, so PO-5531
+for 120 BR-64 burr sets will arrive 3 days after the scheduled date. The full
+quantity will ship together.
+
+Please let me know if this causes any problems on your side.
+
+Best,
+Priya Raman
+Order Management, Ashgrove Precision
+======================================================================
+
+--- Step 1 of 3: supply analyst ---
+
+--- Supply analyst ---
+
+>>> Handoff: pipeline -> supply analyst: the supplier email 03-ashgrove-burr-delay.eml
+Tools offered: get_part, get_orders_for_part, check_coverage
+  [supply analyst tokens: 2,312 in, 124 out]
+
+Analyst tool call 1 of 10: get_part
+  Inputs: {"part_id": "BR-64"}
+  Result: {
+  "part_id": "BR-64",
+  "description": "64 mm burr set",
+  "supplier": "Ashgrove Precision",
+  "on_hand": 70,
+  "scheduled_shipments": [
+    {
+      "po_number": "PO-5531",
+      "supplier": "Ashgrove Precision",
+      "qty": 120,
+      "arrives_in_days": 10
+    }
+  ],
+  "used_in": [
+    {
+      "…
+
+Analyst tool call 2 of 10: get_orders_for_part
+  Inputs: {"part_id": "BR-64"}
+  Result: {
+  "part_id": "BR-64",
+  "orders": [
+    {
+      "order_id": "O-2206",
+      "customer": "Grindstone Coffee Bar",
+      "product": "Grinder 64",
+      "quantity": 30,
+      "units_needed": 30,
+      "ship_day": 8,
+      "late_penalty": "no"
+    },
+    {
+      "order_id": "O-2207",
+      "customer":…
+  [supply analyst tokens: 2,984 in, 136 out]
+
+Analyst tool call 3 of 10: check_coverage
+  Inputs: {"part_id": "BR-64", "arrivals": [{"qty": 120, "arrives_in_days": 13}]}
+  Result: {
+  "part_id": "BR-64",
+  "on_hand": 70,
+  "arrivals_used": [
+    {
+      "qty": 120,
+      "arrives_in_days": 13
+    }
+  ],
+  "arrivals_source": "arrivals given to this tool",
+  "total_supply": 190,
+  "total_needed": 115,
+  "orders": [
+    {
+      "order_id": "O-2206",
+      "customer": "Grindstone…
+  [supply analyst tokens: 3,738 in, 164 out]
+
+>>> Handoff: supply analyst -> pipeline: brief on BR-64; orders at risk: none
+Full analyst brief:
+{
+  "part_id": "BR-64",
+  "what_changed": "PO-5531's 120 BR-64 burr sets will now arrive 13 days from today instead of 10, shipping as a single full-quantity shipment.",
+  "orders_at_risk": [],
+  "options": [],
+  "decisions_for_a_person": [],
+  "supplier_questions": [
+    "Whether the 3-day delay causes any problems on Copperline's side."
+  ]
+}
+
+Check the analyst's reading against the source email (printed at the top):
+  Analyst's reading: PO-5531's 120 BR-64 burr sets will now arrive 13 days from today instead of 10, shipping as a single full-quantity shipment.
+
+--- Step 2 of 3: customer notices ---
+No orders are at risk, so this step is skipped.
+
+--- Step 3 of 3: supplier reply ---
+
+--- Supplier reply ---
+
+>>> Handoff: pipeline -> supplier writer: the supplier's email and the brief, customer names removed
+  [supplier writer tokens: 1,140 in, 243 out]
+
+>>> Handoff: supplier writer -> reviewer: the supplier reply draft and its facts (recipient: supplier), review round 1
+  [reviewer tokens: 1,554 in, 206 out]
+Reviewer's answer:
+APPROVE
+
+>>> Handoff: reviewer -> name check (code): the supplier reply draft (reviewer's verdict: APPROVE)
+Name check: passed (no customer names found)
+
+FINAL DRAFT TO SUPPLIER
+Subject: RE: PO-5531 - BR-64 burr sets - arriving 3 days late
+
+Hello Priya,
+
+Thank you for the update. We confirm the change as described: PO-5531's 120 BR-64 burr sets will now arrive 13 days from today instead of 10, shipping as a single full-quantity shipment — a 3-day delay.
+
+Based on our current order picture, this delay does not put any customer orders at risk, so there is no impact on units or days at this time.
+
+That said, if there is any way to ship a partial quantity sooner or otherwise reduce the delay, we would welcome that to preserve our buffer.
+
+Thank you for flagging this promptly.
+
+Best regards,
+Purchasing, Copperline Coffee Machines
+Marked for a person: no
+
+>>> Handoff: name check (code) -> pipeline: week-05/drafts/copperline-coffee/pipeline/03-ashgrove-burr-delay/supplier-reply.txt (approved by the reviewer; name check passed)
+
+======================================================================
+SUMMARY
+======================================================================
+Run complete.
+
+What changed: PO-5531's 120 BR-64 burr sets will now arrive 13 days from today instead of 10, shipping as a single full-quantity shipment.
+Orders at risk: none
+
+Drafts saved (1):
+  - supplier reply: week-05/drafts/copperline-coffee/pipeline/03-ashgrove-burr-delay/supplier-reply.txt
+
+Drafts marked for a person (0):
+  none
+
+Decisions for a person (0):
+  none
+  (The supplier asked: Whether the 3-day delay causes any problems on Copperline's side.)
+
+Tokens by specialist:
+  supply analyst               3 Claude calls, 9,034 input tokens, 424 output tokens
+  supplier writer              1 Claude calls, 1,140 input tokens, 243 output tokens
+  customer writer              0 Claude calls, 0 input tokens, 0 output tokens
+  reviewer                     1 Claude calls, 1,554 input tokens, 206 output tokens
+  total                        5 Claude calls, 11,728 input tokens, 873 output tokens
+
+Saved this output to week-05/runs/copperline-03-pipeline.txt

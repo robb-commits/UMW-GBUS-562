@@ -1,0 +1,21 @@
+To: Tall Pines Coffee House <hello@tallpinescoffee.example>
+Subject: Your order O-2205: updated ship date
+Status: NEEDS A PERSON: the order has a late penalty
+
+DRAFT
+Subject: Update on Your Order O-2205
+
+Dear Tall Pines Coffee House,
+
+We're writing about your order O-2205 for 25 units of Cafe One. This order is now expected to ship 2 days later than originally planned.
+
+We apologize for this delay. It is due to a delay in a part from one of our suppliers.
+
+We appreciate your patience and understanding, and we'll keep you informed if there are any further updates regarding your order.
+
+Thank you for choosing Copperline Coffee Machines.
+
+Customer Service, Copperline Coffee Machines
+
+--- Reviewer ---
+APPROVE

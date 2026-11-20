@@ -1,15 +1,19 @@
-"""An MCP server with Brookfield Bicycle Company's three supply tools, for the supply analyst.
+"""An MCP server with a company's three supply tools, for the supply analyst.
 
-  get_part             a part's stock on hand, scheduled shipments, and the bike models that use it
+  get_part             a part's stock on hand, scheduled shipments, and the products that use it
   get_orders_for_part  the open customer orders that need the part, earliest ship day first
   check_coverage       which of those orders can ship on time with a given arrival schedule
 
-The tools only read week-05/brookfield-bikes; the calculations are in supply_data.py. The server
+The tools only read one company folder, week-05/<org> (--org, default brookfield-bikes); the
+calculations are in supply_data.py. The server
 talks MCP over stdin/stdout, so an MCP client starts it. It makes no Claude calls and needs no key.
 
 Usage (from the top of the repository; normally specialists.py starts it):
     .venv/bin/python week-05/supply_mcp_server.py
+    .venv/bin/python week-05/supply_mcp_server.py --org copperline-coffee
 """
+
+import argparse
 
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
@@ -29,15 +33,15 @@ class Arrival(BaseModel):
 def create_server() -> MCPServer:
     server = MCPServer(
         "brookfield-supply",
-        instructions="Brookfield Bicycle Company's parts, inbound shipments and customer orders, read-only.",
+        instructions=f"{supply_data.company()}'s parts, inbound shipments and customer orders, read-only.",
         log_level="WARNING",
     )
 
     @server.tool(annotations=READ_ONLY)
     def get_part(part_id: str) -> dict:
         """Get one part's description, supplier, stock on hand, scheduled shipments (purchase order,
-        quantity, arrival in days from today), and the bike models that use it with how many each
-        bike needs."""
+        quantity, arrival in days from today), and the products that use it with how many each
+        one needs."""
         try:
             return supply_data.get_part(part_id)
         except supply_data.DataError as e:
@@ -45,8 +49,8 @@ def create_server() -> MCPServer:
 
     @server.tool(annotations=READ_ONLY)
     def get_orders_for_part(part_id: str) -> dict:
-        """List the open customer orders whose bike model uses this part, earliest ship day first:
-        order number, customer, model, bikes, units of the part needed, ship day (days from today)
+        """List the open customer orders whose product uses this part, earliest ship day first:
+        order number, customer, product, quantity ordered, units of the part needed, ship day (days from today)
         and whether the order has a late penalty."""
         try:
             return supply_data.get_orders_for_part(part_id)
@@ -77,4 +81,12 @@ def create_server() -> MCPServer:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="The supply tools for one company's data, over MCP (stdio).")
+    parser.add_argument("--org", default=supply_data.DEFAULT_ORG,
+                        help=f"company folder in week-05 (default {supply_data.DEFAULT_ORG})")
+    args = parser.parse_args()
+    try:
+        supply_data.set_org(args.org)
+    except supply_data.DataError as e:
+        parser.error(str(e))
     create_server().run("stdio")

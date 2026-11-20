@@ -1,0 +1,58 @@
+Company: Copperline (copperline-coffee)
+From: Owen Brady <o.brady@pelhamfittings.example>
+Subject: Plant maintenance closure - PO-5540 not affected
+Email: 04-pelham-maintenance-closure.eml
+Coordinator: orchestrator agent
+======================================================================
+Source email:
+Hello,
+
+A quick note for your planning: our plant will close for one week of annual
+maintenance, starting four weeks from today.
+
+Your open order, PO-5540 for 60 SW-3 steam wands, ships before the closure
+and will arrive on the scheduled date. No action is needed on your side.
+
+Kind regards,
+Owen Brady
+Customer Care, Pelham Fittings
+======================================================================
+Tools offered: run_supply_analyst, draft_supplier_reply, draft_customer_notice, finish
+
+Orchestrator step 1: finish
+  Inputs: {"summary": "Pelham Fittings notified of a one-week plant maintenance closure starting in 4 weeks, but explicitly confirmed PO-5540 (60 SW-3 steam wands) ships before the closure and will arrive on schedule. No impact to any order, no decision or reply needed.", "needs_decision": false}
+
+--- Orchestrator's choice 1 of at most 10: finish ---
+  Result: Finished.
+
+======================================================================
+SUMMARY
+======================================================================
+Run complete.
+
+From the orchestrator:
+Pelham Fittings notified of a one-week plant maintenance closure starting in 4 weeks, but explicitly confirmed PO-5540 (60 SW-3 steam wands) ships before the closure and will arrive on schedule. No impact to any order, no decision or reply needed.
+
+The supply analyst didn't run, so no one checked the impact on orders.
+
+Drafts saved (0):
+  none
+  (No supplier reply was drafted.)
+
+Drafts marked for a person (0):
+  none
+
+Decisions for a person (0):
+  none
+
+A person must make a decision: yes (the orchestrator said no; the program's checks above override it)
+
+Tokens by specialist:
+  supply analyst               0 Claude calls, 0 input tokens, 0 output tokens
+  supplier writer              0 Claude calls, 0 input tokens, 0 output tokens
+  customer writer              0 Claude calls, 0 input tokens, 0 output tokens
+  reviewer                     0 Claude calls, 0 input tokens, 0 output tokens
+  orchestrator (coordinator)   1 Claude calls, 1,845 input tokens, 582 output tokens
+  total                        1 Claude calls, 1,845 input tokens, 582 output tokens
+
+Saved this output to week-05/runs/copperline-04-orchestrator.txt

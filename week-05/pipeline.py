@@ -5,7 +5,8 @@
   3. a reply to the supplier
 
 Every draft goes through the review step in specialists.py (reviewer, up to 2 revisions, then the
-name check in code). Drafts are saved to week-05/drafts/pipeline/<email>/. Nothing is sent. At the
+name check in code). --org picks the company folder in week-05 (default brookfield-bikes). Drafts are saved to
+week-05/drafts/<org>/pipeline/<email>/. Nothing is sent. At the
 end the program prints a summary: drafts saved, drafts marked for a person, decisions for a person,
 and total tokens.
 
@@ -13,6 +14,8 @@ Usage (from the top of the repository):
     .venv/bin/python week-05/pipeline.py --email week-05/brookfield-bikes/supplier-emails/01-northgate-controller-delay.eml
     .venv/bin/python week-05/pipeline.py --email week-05/brookfield-bikes/supplier-emails/02-kendall-tire-options.eml \
         --save week-05/runs/pipeline-02.txt
+    .venv/bin/python week-05/pipeline.py --org copperline-coffee \
+        --email week-05/copperline-coffee/supplier-emails/01-danforth-pump-delay.eml
 """
 
 import anthropic
@@ -42,4 +45,4 @@ async def coordinate(client: anthropic.Anthropic, email: Email) -> None:
 
 
 if __name__ == "__main__":
-    run_cli("Prepare Brookfield's response to one supplier email with a fixed pipeline. Nothing is sent.", coordinate)
+    run_cli("Prepare a company's response to one supplier email with a fixed pipeline. Nothing is sent.", coordinate)

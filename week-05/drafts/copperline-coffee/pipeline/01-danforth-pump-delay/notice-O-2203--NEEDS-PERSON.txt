@@ -1,0 +1,21 @@
+To: Elm State University Dining <dining@elmstate.example>
+Subject: Your order O-2203: updated ship date
+Status: NEEDS A PERSON: the order has a late penalty
+
+DRAFT
+Subject: Update on Your Order O-2203
+
+Dear Elm State University Dining,
+
+We're writing about your order O-2203 for 50 units of the Cafe One. This order is now expected to ship 7 days later than originally planned.
+
+We're sorry for the inconvenience this delay may cause. The cause is a delay in a part from one of our suppliers.
+
+We will keep you informed of any further updates regarding your order's progress.
+
+Thank you for your patience and understanding.
+
+Customer Service, Copperline Coffee Machines
+
+--- Reviewer ---
+APPROVE

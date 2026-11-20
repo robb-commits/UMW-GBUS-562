@@ -1,0 +1,21 @@
+To: Kettle & Crumb Bakery <owner@kettleandcrumb.example>
+Subject: Your order O-2204: updated ship date
+Status: approved by the reviewer; name check passed
+
+DRAFT
+Subject: Update on Your Order O-2204
+
+Dear Kettle & Crumb Bakery,
+
+We're writing to update you on your order, O-2204, for 10 units of the Cafe Duo.
+
+Your order is now expected to ship 4 days later than originally planned. We apologize for this delay.
+
+This was caused by a delay in a part from one of our suppliers.
+
+We'll keep you informed if anything further changes. Thank you for your patience and for choosing Copperline Coffee Machines.
+
+Customer Service, Copperline Coffee Machines
+
+--- Reviewer ---
+APPROVE
